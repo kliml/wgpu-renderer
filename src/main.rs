@@ -39,14 +39,6 @@ fn main() {
                             // new_inner_size is &mut so w have to dereference it twice
                             state.resize(**new_inner_size);
                         }
-                        WindowEvent::CursorMoved { position, ..} => {
-                            let (x, y) = (position.x, position.y);
-                            if x > (state.size.width / 2) as i32 {
-                                state.clear_color = wgpu::Color::RED;
-                            } else {
-                                state.clear_color = wgpu::Color::BLACK;
-                            }
-                        }
                         _ => {}
                     }
                 }
