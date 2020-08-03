@@ -7,7 +7,9 @@ use winit::{
 use futures::executor::block_on;
 
 mod state;
+mod vertex;
 use state::*;
+use vertex::*;
 
 fn main() {
     let event_loop = EventLoop::new();

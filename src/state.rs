@@ -4,6 +4,8 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+use crate::vertex::*;
+
 pub struct State {
     surface: wgpu::Surface,
     adapter: wgpu::Adapter,
@@ -11,10 +13,10 @@ pub struct State {
     queue: wgpu::Queue,
     sc_desc: wgpu::SwapChainDescriptor,
     swap_chain: wgpu::SwapChain,
-
     render_pipeline: wgpu::RenderPipeline,
-
+    pub vertex_buffer: wgpu::Buffer,
     pub size: winit::dpi::PhysicalSize<u32>,
+    num_vetices: u32,
 }
 
 impl State {
@@ -97,13 +99,21 @@ impl State {
             depth_stencil_state: None,
             vertex_state: wgpu::VertexStateDescriptor {
                 index_format: wgpu::IndexFormat::Uint16,
-                vertex_buffers: &[],
+                vertex_buffers: &[
+                    Vertex::desc(),
+                ],
             },
             sample_count: 1,
             sample_mask: !0,
             alpha_to_coverage_enabled: false,
         });
 
+        let vertex_buffer = device.create_buffer_with_data(
+            bytemuck::cast_slice(VERTICES),
+            wgpu::BufferUsage::VERTEX,
+        );
+
+        let num_vetices = VERTICES.len() as u32;
 
         Self {
             surface,
@@ -113,6 +123,8 @@ impl State {
             sc_desc,
             swap_chain,
             render_pipeline,
+            vertex_buffer,
+            num_vetices,
             size,
         }
     }
@@ -159,7 +171,8 @@ impl State {
             });
 
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3, 0..1);
+            render_pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
+            render_pass.draw(0..self.num_vetices, 0..1);
         }
 
         self.queue.submit(&[
