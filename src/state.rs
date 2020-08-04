@@ -15,8 +15,9 @@ pub struct State {
     swap_chain: wgpu::SwapChain,
     render_pipeline: wgpu::RenderPipeline,
     pub vertex_buffer: wgpu::Buffer,
+    pub index_buffer: wgpu::Buffer,
     pub size: winit::dpi::PhysicalSize<u32>,
-    num_vetices: u32,
+    num_indices: u32,
 }
 
 impl State {
@@ -113,7 +114,12 @@ impl State {
             wgpu::BufferUsage::VERTEX,
         );
 
-        let num_vetices = VERTICES.len() as u32;
+        let index_buffer = device.create_buffer_with_data(
+            bytemuck::cast_slice(INDICES),
+            wgpu::BufferUsage::INDEX,
+        );
+
+        let num_indices = INDICES.len() as u32;
 
         Self {
             surface,
@@ -124,7 +130,8 @@ impl State {
             swap_chain,
             render_pipeline,
             vertex_buffer,
-            num_vetices,
+            index_buffer,
+            num_indices,
             size,
         }
     }
@@ -171,8 +178,9 @@ impl State {
             });
 
             render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.set_index_buffer(&self.index_buffer, 0, 0);
             render_pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
-            render_pass.draw(0..self.num_vetices, 0..1);
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
         }
 
         self.queue.submit(&[
