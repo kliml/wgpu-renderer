@@ -8,6 +8,7 @@ use futures::executor::block_on;
 
 mod state;
 mod vertex;
+mod texture;
 use state::*;
 use vertex::*;
 

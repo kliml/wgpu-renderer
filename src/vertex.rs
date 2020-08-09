@@ -2,7 +2,7 @@
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
     position: [f32; 3],
-    color: [f32; 3],
+    tex_coords: [f32; 2],
 }
 
 impl Vertex {
