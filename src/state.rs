@@ -5,6 +5,7 @@ use winit::{
 };
 
 use crate::vertex::*;
+use crate::texture;
 
 pub struct State {
     surface: wgpu::Surface,
@@ -17,6 +18,8 @@ pub struct State {
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
     pub size: winit::dpi::PhysicalSize<u32>,
+    diffuse_texture: texture::Texture,
+    diffuse_bind_group: wgpu::BindGroup,
     num_indices: u32,
 }
 
@@ -58,36 +61,27 @@ impl State {
         let diffuse_image = image::load_from_memory(diffuse_bytes).unwrap();
         let diffuse_rgba = diffuse_image.as_rgba8().unwrap();
 
-        use image::GenericImageView;
-        let dimensions = diffuse_image.dimensions();
+        let diffuse_bytes = include_bytes!("happy-tree.png");
+        let (diffuse_texture, cmd_buffer) = texture::Texture::from_bytes(&device, diffuse_bytes, "happy-tree.png").unwrap();
 
-        let size = wgpu::Extent3d {
-            width: dimensions.0,
-            height: dimensions.1,
-            depth: 1,
-        };
-        let diffuse_texture = device.create_texture(&wgpu::TextureDescriptor {
-            // All textures are stored as 3d, we represent our 2d texture
-            // by setting depth to 1.
-            size: wgpu::Extent3d {
-                width: dimensions.0,
-                height: dimensions.1,
-                depth: 1,
-            },
-            // You can store multiple textures of the same size in one
-            // Texture object
-            array_layer_count: 1,
-            mip_level_count: 1, // We'll talk about this a little later
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            // SAMPLED tells wgpu that we want to use this texture in shaders
-            // COPY_DST means that we want to copy data to this texture
-            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::COPY_DST,
-            label: Some("diffuse_texture"),
-        });
+        queue.submit(&[cmd_buffer]);
         
+        let diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &texture_bind_group_layout,
+            bindings: &[
+                wgpu::Binding {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+                },
+                wgpu::Binding {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+                }
+            ],
+            label: Some("diffuse_bind_group"),
+        });
 
+        
         let vs_src = include_str!("shader.vert");
         let fs_src = include_str!("shader.frag");
 
