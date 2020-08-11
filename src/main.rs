@@ -7,8 +7,8 @@ use winit::{
 use futures::executor::block_on;
 
 mod state;
-mod vertex;
 mod texture;
+mod vertex;
 use state::*;
 use vertex::*;
 
