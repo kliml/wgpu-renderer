@@ -4,8 +4,8 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-use crate::texture;
 use crate::vertex::*;
+use crate::{camera, texture};
 
 pub struct State {
     surface: wgpu::Surface,
@@ -21,6 +21,7 @@ pub struct State {
     diffuse_texture: texture::Texture,
     diffuse_bind_group: wgpu::BindGroup,
     num_indices: u32,
+    camera: camera::Camera,
 }
 
 impl State {
@@ -170,6 +171,16 @@ impl State {
             device.create_buffer_with_data(bytemuck::cast_slice(INDICES), wgpu::BufferUsage::INDEX);
         let num_indices = INDICES.len() as u32;
 
+        let camera = camera::Camera {
+            eye: (0.0, 1.0, 2.0).into(),
+            target: (0.0, 0.0, 0.0).into(),
+            up: cgmath::Vector3::unit_y(),
+            aspect: sc_desc.width as f32 / sc_desc.height as f32,
+            fovy: 45.0,
+            znear: 0.1,
+            zfar: 100.0,
+        };
+
         Self {
             surface,
             device,
@@ -183,6 +194,7 @@ impl State {
             diffuse_texture,
             diffuse_bind_group,
             size,
+            camera,
         }
     }
 

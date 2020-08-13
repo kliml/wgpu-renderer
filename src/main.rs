@@ -6,6 +6,7 @@ use winit::{
 
 use futures::executor::block_on;
 
+mod camera;
 mod state;
 mod texture;
 mod vertex;
