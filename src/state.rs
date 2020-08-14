@@ -5,7 +5,7 @@ use winit::{
 };
 
 use crate::vertex::*;
-use crate::{camera, texture};
+use crate::{camera, texture, uniforms};
 
 pub struct State {
     surface: wgpu::Surface,
@@ -180,6 +180,14 @@ impl State {
             znear: 0.1,
             zfar: 100.0,
         };
+
+        let mut uniforms = uniforms::Uniforms::new();
+        uniforms.update_view_proj(&camera);
+
+        let uniform_buffer = device.create_buffer_with_data(
+            bytemuck::cast_slice(&[uniforms]),
+            wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+        );
 
         Self {
             surface,
